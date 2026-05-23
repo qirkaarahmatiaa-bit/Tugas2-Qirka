@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITTA UT - Tracking Delivery Order</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+</head>
+<body>
+    <div id="app" class="container">
+        <header>
+            <a href="index.html" class="btn-back">⬅ Kembali ke Menu Utama</a>
+            <h2>🚚 Tracking & Input Delivery Order (DO) Bahan Ajar</h2>
+        </header>
+
+        <section class="form-section">
+            <h3>📝 Formulir Delivery Order Baru</h3>
+            <form @submit.prevent="simpanDO">
+                <div class="form-grid">
+                    <div>
+                        <label>Nomor DO (Otomatis tergenerasi)</label>
+                        <input type="text" :value="generatedDoNumber" disabled class="input-disabled">
+                    </div>
+                    <div>
+                        <label>NIM Mahasiswa*</label>
+                        <input type="text" v-model="formDo.nim" placeholder="Masukkan 9 digit NIM">
+                    </div>
+                    <div>
+                        <label>Nama Penerima*</label>
+                        <input type="text" v-model="formDo.nama" placeholder="Nama Lengkap Mahasiswa">
+                    </div>
+                    <div>
+                        <label>Ekspedisi*</label>
+                        <select v-model="formDo.ekspedisi">
+                            <option value="">-- Pilih Layanan Ekspedisi --</option>
+                            <option v-for="exp in pengirimanList" :key="exp.kode" :value="exp.kode">
+                                {{ exp.nama }}
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Paket Bahan Ajar*</label>
+                        <select v-model="formDo.paketKode" @change="updatePaketDetail">
+                            <option value="">-- Pilih Paket Buku --</option>
+                            <option v-for="p in paket" :key="p.kode" :value="p.kode">
+                                {{ p.kode }} - {{ p.nama }}
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Tanggal Kirim</label>
+                        <input type="date" v-model="formDo.tanggalKirim">
+                    </div>
+                    <div>
+                        <label>Total Harga Paket (Rp)</label>
+                        <input type="text" :value="formDo.totalHarga" disabled class="input-disabled">
+                    </div>
+                </div>
+
+                <div v-if="selectedPaketDetail" class="paket-detail-box">
+                    <h4>📦 Detail Isi Paket ({{ selectedPaketDetail.nama }}):</h4>
+                    <ul>
+                        <li v-for="buku in selectedPaketDetail.isi" :key="buku">
+                            📚 Kode Modul Mata Kuliah: <strong>{{ buku }}</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <p v-if="errorDo" class="error-text">⚠️ {{ errorDo }}</p>
+                <button type="submit" class="btn-submit">🚀 Buat Pengiriman DO</button>
+            </form>
+        </section>
+
+        <section class="table-section">
+            <h3>📊 Status Monitoring Pengiriman DO</h3>
+            <div v-for="(data, noDO) in listTracking" :key="noDO" class="tracking-card">
+                <div class="card-header">
+                    <h4>No. DO: <span>{{ noDO }}</span></h4>
+                    <span class="badge warning">{{ data.status }}</span>
+                </div>
+                <div class="card-body">
+                    <p><strong>Penerima:</strong> {{ data.nama }} (NIM: {{ data.nim }})</p>
+                    <p><strong>Ekspedisi & Tanggal:</strong> {{ data.ekspedisi }} | 📅 {{ data.tanggalKirim }}</p>
+                    <p><strong>Total Bayar:</strong> Rp {{ data.total }}</p>
+                    
+                    <h5>📜 Riwayat Perjalanan Paket:</h5>
+                    <ul class="timeline">
+                        <li v-for="log in data.perjalanan">
+                            <small class="text-muted">[{{ log.waktu }}]</small> - {{ log.keterangan }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/tracking-app.js"></script>
+</body>
+</html>
